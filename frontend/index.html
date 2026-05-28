@@ -667,13 +667,169 @@ input[type="text"]:focus { border-color: #16a34a; }
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+
+/* ===== MOBILE HAMBURGER ===== */
+.mobile-topbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid #e9eaf0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.mobile-logo {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.3px;
+}
+.mobile-logo span { color: #16a34a; }
+.hamburger {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 9px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+}
+.hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #374151;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+/* Sidebar overlay on mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 98;
+}
+.sidebar-overlay.active { display: block; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+
+  body { flex-direction: column; overflow: auto; height: auto; min-height: 100vh; }
+
+  /* Hide desktop sidebar, show mobile topbar */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 280px;
+    z-index: 99;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .mobile-topbar { display: flex; }
+
+  .main {
+    height: auto;
+    min-height: calc(100vh - 57px);
+    overflow: visible;
+  }
+
+  .chat-container {
+    overflow-y: visible;
+    padding: 16px;
+    min-height: auto;
+  }
+
+  /* Welcome */
+  .welcome h1 { font-size: 28px; }
+  .welcome p { font-size: 13px; }
+  .welcome-features { flex-direction: column; align-items: center; gap: 12px; }
+
+  /* Result card */
+  .result-card { border-radius: 12px; }
+
+  /* Stock header stacks on mobile */
+  .stock-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .stock-header-right { width: 100%; justify-content: space-between; }
+  .stock-price { font-size: 18px; }
+
+  /* Stats rows — 3 columns on mobile */
+  .stats-row { flex-wrap: wrap; }
+  .stat-cell {
+    flex: 0 0 33.333%;
+    min-width: 0;
+    padding: 10px 12px;
+    border-right: 1px solid #f0f1f5;
+    border-bottom: 1px solid #f0f1f5;
+  }
+  .stat-cell:nth-child(3n) { border-right: none; }
+  .stat-label { font-size: 9px; }
+  .stat-value { font-size: 12px; }
+
+  /* Analysis */
+  .analysis-body { font-size: 13px; padding: 16px; }
+
+  /* Sentiment */
+  .sentiment-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .confidence-badge { width: 100%; justify-content: space-between; }
+  .sentiment-legend { flex-wrap: wrap; gap: 12px; }
+
+  /* Headlines */
+  .headlines-section { padding: 12px 14px 16px; }
+  .headline-text { font-size: 12px; }
+
+  /* Input area */
+  .input-area { padding: 10px 12px; position: sticky; bottom: 0; background: white; z-index: 10; }
+  .input-box { gap: 8px; }
+  input[type="text"] { padding: 11px 13px; font-size: 14px; }
+  .analyze-btn { padding: 11px 16px; font-size: 14px; }
+
+  /* Watchlist button smaller on mobile */
+  .add-watchlist-btn { padding: 7px 10px; font-size: 11px; }
+
+  /* Toast */
+  .toast-container { bottom: 70px; right: 12px; left: 12px; }
+  .toast { min-width: unset; width: 100%; }
+
+  /* User message */
+  .message { max-width: 85%; }
+}
+
+@media (max-width: 380px) {
+  .stat-cell { flex: 0 0 50%; }
+  .stat-cell:nth-child(3n) { border-right: 1px solid #f0f1f5; }
+  .stat-cell:nth-child(2n) { border-right: none; }
+  .welcome h1 { font-size: 24px; }
+}
 </style>
 </head>
 <body>
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toastContainer"></div>
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<!-- MOBILE TOPBAR -->
+<div class="mobile-topbar">
+  <div class="mobile-logo">MarketMind <span>AI</span></div>
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</div>
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
   <div class="logo">MarketMind <span>AI</span></div>
   <div class="new-chat" id="newChatBtn" onclick="newResearch()">+ New Research</div>
   <!-- WATCHLIST -->
@@ -725,11 +881,25 @@ input[type="text"]:focus { border-color: #16a34a; }
 // ===================================
 const API = "https://marketmindaimain-production.up.railway.app";
 const resultCache = {};
-const watchlistLocal = {}; // mirror of backend state: { "TSLA": { ticker, company, price, change_pct, direction } }
+const watchlistLocal = {};
 let refreshInterval = null;
 let refreshCountdown = 45;
 let countdownInterval = null;
 const REFRESH_SECONDS = 45;
+
+// ===================================
+// SIDEBAR MOBILE TOGGLE
+// ===================================
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+  sidebar.classList.toggle("open");
+  overlay.classList.toggle("active");
+}
+function closeSidebar() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sidebarOverlay").classList.remove("active");
+}
 // ===================================
 // INIT
 // ===================================
@@ -1117,6 +1287,7 @@ function addHistoryItem(data) {
   item.onclick = function() {
     document.querySelectorAll(".history-item").forEach(i => i.classList.remove("active"));
     item.classList.add("active");
+    closeSidebar();
     const chat = document.getElementById("chat");
     chat.innerHTML = "";
     const cached = resultCache[ticker];
