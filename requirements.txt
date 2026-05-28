@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+groq
+yfinance
+yahooquery
+requests
+python-multipart

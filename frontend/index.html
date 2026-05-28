@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarketMind AI — AI-Powered Market Intelligence</title>
+<meta name="description" content="Institutional-grade AI market intelligence terminal with real-time watchlist, live price tracking, and equity research reports.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+body {
+  background: #f5f6fa;
+  color: #111827;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 260px;
+  background: #ffffff;
+  border-right: 1px solid #e9eaf0;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.logo {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+  padding: 6px 8px 18px;
+  letter-spacing: -0.3px;
+}
+.logo span { color: #16a34a; }
+.new-chat {
+  background: #f3f4f6;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  transition: background 0.15s;
+  border: 1px solid #e5e7eb;
+}
+.new-chat:hover { background: #e9eaf0; }
+/* ===== WATCHLIST SECTION ===== */
+.watchlist-section {
+  margin-bottom: 20px;
+}
+.watchlist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  margin-bottom: 10px;
+}
+.section-title {
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.watchlist-refresh-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.watchlist-empty {
+  padding: 16px 12px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 12px;
+  line-height: 1.5;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px dashed #e5e7eb;
+}
+.watchlist-empty-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+  display: block;
+}
+#watchlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.watchlist-item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: relative;
+  background: #f9fafb;
+  border: 1px solid transparent;
+}
+.watchlist-item:hover {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+.watchlist-item-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+.watchlist-item-ticker {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.2px;
+}
+.watchlist-item-name {
+  font-size: 10.5px;
+  color: #9ca3af;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.watchlist-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+.watchlist-item-price {
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+}
+.watchlist-item-change {
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.watchlist-item-change.up {
+  color: #16a34a;
+}
+.watchlist-item-change.down {
+  color: #dc2626;
+}
+.watchlist-item-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  color: #d1d5db;
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.15s;
+}
+.watchlist-item:hover .watchlist-item-remove {
+  opacity: 1;
+}
+.watchlist-item-remove:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.watchlist-refresh-timer {
+  padding: 4px 8px;
+  text-align: center;
+  font-size: 10px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+/* ===== DIVIDER ===== */
+.sidebar-divider {
+  height: 1px;
+  background: #e9eaf0;
+  margin: 4px 8px 16px;
+}
+/* ===== HISTORY ===== */
+.history-title {
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  padding-left: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+#history { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; flex: 1; }
+.history-item {
+  padding: 9px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.history-item:hover { background: #f3f4f6; }
+.history-item.active { background: #f0fdf4; }
+.history-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.history-item-ticker {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+/* ===== MAIN ===== */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f5f6fa;
+  min-height: 0;
+  overflow: hidden;
+}
+.chat-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+/* ===== WELCOME ===== */
+.welcome {
+  text-align: center;
+  margin: auto;
+  padding: 40px 0;
+}
+.welcome h1 {
+  font-size: 44px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -1px;
+}
+.welcome p {
+  color: #6b7280;
+  margin-top: 10px;
+  font-size: 15px;
+}
+.welcome-features {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  margin-top: 28px;
+}
+.welcome-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+}
+.welcome-feature-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+/* ===== MESSAGES ===== */
+.message {
+  max-width: 560px;
+  padding: 11px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.user-message {
+  align-self: flex-end;
+  background: #111827;
+  color: white;
+}
+.ai-thinking {
+  align-self: flex-start;
+  background: white;
+  border: 1px solid #e9eaf0;
+  color: #6b7280;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.thinking-dots {
+  display: flex;
+  gap: 4px;
+}
+.thinking-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #9ca3af;
+  animation: dotBounce 1.4s ease-in-out infinite;
+}
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+/* ===== RESULT CARD ===== */
+.result-card {
+  align-self: stretch;
+  background: white;
+  border: 1px solid #e9eaf0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  flex-shrink: 0;
+  animation: cardSlideIn 0.4s ease-out;
+}
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Stock header */
+.stock-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f1f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.stock-name-block { display: flex; flex-direction: column; gap: 2px; }
+.stock-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.3px;
+}
+.stock-ticker {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+.stock-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.stock-price-block { text-align: right; }
+.stock-price {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.5px;
+}
+.stock-price-sub {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 1px;
+}
+/* Add to watchlist button */
+.add-watchlist-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.add-watchlist-btn:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15);
+}
+.add-watchlist-btn.added {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #16a34a;
+  cursor: default;
+  pointer-events: none;
+}
+.add-watchlist-btn.added:hover {
+  transform: none;
+  box-shadow: none;
+}
+.watchlist-btn-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+/* Stats row */
+.stats-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #f0f1f5;
+}
+.stat-cell {
+  flex: 1;
+  padding: 12px 16px;
+  border-right: 1px solid #f0f1f5;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.stat-cell:last-child { border-right: none; }
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
+.rec-buy        { color: #16a34a; }
+.rec-strong_buy { color: #16a34a; }
+.rec-hold       { color: #d97706; }
+.rec-sell       { color: #dc2626; }
+.rec-avoid      { color: #dc2626; }
+/* ===== ANALYSIS ===== */
+.analysis-body {
+  padding: 20px 22px;
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: #374151;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-bottom: 1px solid #f0f1f5;
+}
+/* ===== SENTIMENT & CONFIDENCE ===== */
+.sentiment-section {
+  padding: 18px 20px 20px;
+  border-bottom: 1px solid #f0f1f5;
+}
+.sentiment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.sentiment-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.confidence-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f9fafb;
+  border: 1px solid #f0f1f5;
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+.confidence-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+}
+.confidence-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+.sentiment-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.sentiment-bar-bullish { background: #16a34a; transition: width 0.5s; }
+.sentiment-bar-neutral { background: #d1d5db; transition: width 0.5s; }
+.sentiment-bar-bearish { background: #dc2626; transition: width 0.5s; }
+.sentiment-legend {
+  display: flex;
+  gap: 24px;
+}
+.sentiment-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sentiment-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sentiment-dot-bullish { background: #16a34a; }
+.sentiment-dot-neutral { background: #d1d5db; }
+.sentiment-dot-bearish { background: #dc2626; }
+.sentiment-legend-text {
+  font-size: 12px;
+  color: #374151;
+  font-weight: 500;
+}
+.sentiment-legend-pct {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 600;
+}
+/* ===== HEADLINES ===== */
+.headlines-section {
+  padding: 16px 20px 20px;
+}
+.headlines-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+.headline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f9fafb;
+  border: 1px solid #f0f1f5;
+  margin-bottom: 8px;
+  transition: background 0.15s;
+}
+.headline-item:last-child { margin-bottom: 0; }
+.headline-item:hover { background: #f3f4f6; }
+.headline-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: #111827;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.headline-text {
+  font-size: 13px;
+  color: #1f2937;
+  line-height: 1.55;
+  font-weight: 400;
+}
+/* ===== INPUT ===== */
+.input-area {
+  padding: 14px 20px;
+  border-top: 1px solid #e9eaf0;
+  background: white;
+  flex-shrink: 0;
+}
+.input-box {
+  max-width: 900px;
+  margin: auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+input[type="text"] {
+  flex: 1;
+  background: #f9fafb;
+  padding: 13px 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+input[type="text"]:focus { border-color: #16a34a; }
+.analyze-btn {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 13px 22px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.analyze-btn:hover { background: #15803d; }
+.analyze-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast-container {
+  position: fixed;
+  bottom: 80px;
+  right: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 999;
+}
+.toast {
+  background: #111827;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: toastIn 0.35s ease-out, toastOut 0.35s ease-in 2.5s forwards;
+  min-width: 200px;
+}
+.toast-icon { font-size: 15px; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-8px) scale(0.96); }
+}
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+</style>
+</head>
+<body>
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">MarketMind <span>AI</span></div>
+  <div class="new-chat" id="newChatBtn" onclick="newResearch()">+ New Research</div>
+  <!-- WATCHLIST -->
+  <div class="watchlist-section" id="watchlistSection">
+    <div class="watchlist-header">
+      <div class="section-title">Watchlist</div>
+      <div class="watchlist-refresh-dot" id="refreshDot" title="Live — auto-refreshing"></div>
+    </div>
+    <div id="watchlist-list"></div>
+    <div class="watchlist-refresh-timer" id="refreshTimer">Refreshes in 45s</div>
+  </div>
+  <div class="sidebar-divider"></div>
+  <!-- HISTORY -->
+  <div class="history-title">Recent</div>
+  <div id="history"></div>
+</div>
+<!-- MAIN -->
+<div class="main">
+  <div class="chat-container" id="chat">
+    <div class="welcome">
+      <h1>MarketMind AI</h1>
+      <p>Institutional-grade AI market intelligence terminal</p>
+      <div class="welcome-features">
+        <div class="welcome-feature">
+          <div class="welcome-feature-icon">📊</div>
+          AI Research Reports
+        </div>
+        <div class="welcome-feature">
+          <div class="welcome-feature-icon">👁</div>
+          Portfolio Watchlist
+        </div>
+        <div class="welcome-feature">
+          <div class="welcome-feature-icon">⚡</div>
+          Live Price Tracking
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="input-area">
+    <div class="input-box">
+      <input type="text" id="company" placeholder="Search Tesla, Nvidia, Infosys...">
+      <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">Analyze</button>
+    </div>
+  </div>
+</div>
+<script>
+// ===================================
+// STATE
+// ===================================
+const API = "http://127.0.0.1:8000";
+const resultCache = {};
+const watchlistLocal = {}; // mirror of backend state: { "TSLA": { ticker, company, price, change_pct, direction } }
+let refreshInterval = null;
+let refreshCountdown = 45;
+let countdownInterval = null;
+const REFRESH_SECONDS = 45;
+// ===================================
+// INIT
+// ===================================
+document.getElementById("company").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") { e.preventDefault(); analyze(); }
+});
+// Load watchlist from backend on startup
+loadWatchlist();
+startAutoRefresh();
+// ===================================
+// TOAST
+// ===================================
+function showToast(message, icon = "✓") {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `<span class="toast-icon">${icon}</span>${message}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+// ===================================
+// WATCHLIST
+// ===================================
+async function loadWatchlist() {
+  try {
+    const res = await fetch(`${API}/watchlist`);
+    const data = await res.json();
+    // Clear local
+    Object.keys(watchlistLocal).forEach(k => delete watchlistLocal[k]);
+    (data.watchlist || []).forEach(item => {
+      watchlistLocal[item.ticker] = item;
+    });
+    renderWatchlist();
+  } catch(err) {
+    console.log("Watchlist load failed:", err);
+  }
+}
+async function addToWatchlist(ticker, company, currency) {
+  const key = ticker.toUpperCase();
+  if (watchlistLocal[key]) {
+    showToast(`${key} already in watchlist`, "📌");
+    return;
+  }
+  try {
+    const res = await fetch(`${API}/watchlist/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ticker: key, company, currency: currency || "$" })
+    });
+    const data = await res.json();
+    if (data.status === "added" || data.status === "already_exists") {
+      watchlistLocal[key] = {
+        ticker: key,
+        company,
+        price: resultCache[key] ? resultCache[key].price : "...",
+        change_pct: 0,
+        direction: "up"
+      };
+      renderWatchlist();
+      showToast(`${key} added to watchlist`, "📌");
+      // Immediately refresh prices to get accurate data
+      refreshWatchlistPrices();
+      // Update button state on any visible cards
+      updateWatchlistButtons();
+    }
+  } catch(err) {
+    showToast("Failed to add to watchlist", "⚠");
+  }
+}
+async function removeFromWatchlist(ticker) {
+  const key = ticker.toUpperCase();
+  try {
+    const res = await fetch(`${API}/watchlist/remove/${key}`, { method: "DELETE" });
+    const data = await res.json();
+    delete watchlistLocal[key];
+    renderWatchlist();
+    showToast(`${key} removed`, "🗑");
+    updateWatchlistButtons();
+  } catch(err) {
+    showToast("Failed to remove", "⚠");
+  }
+}
+async function refreshWatchlistPrices() {
+  if (Object.keys(watchlistLocal).length === 0) return;
+  try {
+    const res = await fetch(`${API}/watchlist/prices`);
+    const data = await res.json();
+    (data.prices || []).forEach(item => {
+      if (watchlistLocal[item.ticker]) {
+        watchlistLocal[item.ticker].price = item.price;
+        watchlistLocal[item.ticker].change_pct = item.change_pct;
+        watchlistLocal[item.ticker].direction = item.direction;
+      }
+    });
+    renderWatchlist();
+  } catch(err) {
+    console.log("Price refresh failed:", err);
+  }
+}
+function renderWatchlist() {
+  const list = document.getElementById("watchlist-list");
+  const items = Object.values(watchlistLocal);
+  if (items.length === 0) {
+    list.innerHTML = `
+      <div class="watchlist-empty">
+        <span class="watchlist-empty-icon">👁</span>
+        Analyze a stock and add it<br>to your watchlist
+      </div>`;
+    document.getElementById("refreshTimer").style.display = "none";
+    return;
+  }
+  document.getElementById("refreshTimer").style.display = "block";
+  list.innerHTML = items.map(item => {
+    const arrow = item.direction === "up" ? "↑" : "↓";
+    const changeClass = item.direction === "up" ? "up" : "down";
+    const sign = item.change_pct >= 0 ? "+" : "";
+    return `
+      <div class="watchlist-item" onclick="openWatchlistStock('${item.ticker}')" id="wl_${item.ticker}">
+        <div class="watchlist-item-left">
+          <div class="watchlist-item-ticker">${item.ticker}</div>
+          <div class="watchlist-item-name">${item.company || ""}</div>
+        </div>
+        <div class="watchlist-item-right">
+          <div class="watchlist-item-price">${item.price || "..."}</div>
+          <div class="watchlist-item-change ${changeClass}">
+            ${arrow} ${sign}${item.change_pct}%
+          </div>
+        </div>
+        <button class="watchlist-item-remove" onclick="event.stopPropagation(); removeFromWatchlist('${item.ticker}')" title="Remove">✕</button>
+      </div>`;
+  }).join("");
+}
+function openWatchlistStock(ticker) {
+  const key = ticker.toUpperCase();
+  const chat = document.getElementById("chat");
+  // If we have cached analysis data, show it immediately
+  if (resultCache[key]) {
+    chat.innerHTML = "";
+    renderResult(resultCache[key]);
+    // Mark history item active
+    document.querySelectorAll(".history-item").forEach(i => i.classList.remove("active"));
+    const histItem = document.getElementById("hist_" + key);
+    if (histItem) histItem.classList.add("active");
+  } else {
+    // Trigger an analysis for this ticker
+    document.getElementById("company").value = ticker;
+    analyze();
+  }
+}
+function updateWatchlistButtons() {
+  document.querySelectorAll(".add-watchlist-btn").forEach(btn => {
+    const ticker = btn.dataset.ticker;
+    if (ticker && watchlistLocal[ticker.toUpperCase()]) {
+      btn.innerHTML = `<span class="watchlist-btn-icon">✓</span> In Watchlist`;
+      btn.classList.add("added");
+    } else if (ticker) {
+      btn.innerHTML = `<span class="watchlist-btn-icon">+</span> Add to Watchlist`;
+      btn.classList.remove("added");
+    }
+  });
+}
+// ===================================
+// AUTO-REFRESH
+// ===================================
+function startAutoRefresh() {
+  refreshCountdown = REFRESH_SECONDS;
+  updateCountdownDisplay();
+  // Clear existing intervals
+  if (refreshInterval) clearInterval(refreshInterval);
+  if (countdownInterval) clearInterval(countdownInterval);
+  // Price refresh
+  refreshInterval = setInterval(() => {
+    refreshWatchlistPrices();
+    refreshCountdown = REFRESH_SECONDS;
+  }, REFRESH_SECONDS * 1000);
+  // Countdown display
+  countdownInterval = setInterval(() => {
+    refreshCountdown--;
+    if (refreshCountdown < 0) refreshCountdown = REFRESH_SECONDS;
+    updateCountdownDisplay();
+  }, 1000);
+}
+function updateCountdownDisplay() {
+  const el = document.getElementById("refreshTimer");
+  if (Object.keys(watchlistLocal).length === 0) {
+    el.style.display = "none";
+    return;
+  }
+  el.style.display = "block";
+  el.textContent = `Refreshes in ${refreshCountdown}s`;
+}
+// ===================================
+// NEW RESEARCH
+// ===================================
+function newResearch() {
+  document.getElementById("chat").innerHTML = `
+    <div class="welcome">
+      <h1>MarketMind AI</h1>
+      <p>Institutional-grade AI market intelligence terminal</p>
+      <div class="welcome-features">
+        <div class="welcome-feature">
+          <div class="welcome-feature-icon">📊</div>
+          AI Research Reports
+        </div>
+        <div class="welcome-feature">
+          <div class="welcome-feature-icon">👁</div>
+          Portfolio Watchlist
+        </div>
+        <div class="welcome-feature">
+          <div class="welcome-feature-icon">⚡</div>
+          Live Price Tracking
+        </div>
+      </div>
+    </div>`;
+  document.getElementById("company").value = "";
+  document.querySelectorAll(".history-item").forEach(i => i.classList.remove("active"));
+}
+// ===================================
+// RENDER RESULT CARD
+// ===================================
+function renderResult(data) {
+  const chat = document.getElementById("chat");
+  const welcome = chat.querySelector(".welcome");
+  if (welcome) welcome.remove();
+  const rec = (data.recommendation || "HOLD").toUpperCase();
+  const recClass = "rec-" + rec.toLowerCase().replace(/\s/g, "_");
+  const ticker = (data.ticker || "").toUpperCase();
+  const isInWatchlist = !!watchlistLocal[ticker];
+  // Headlines HTML
+  let headlinesHTML = "";
+  if (data.headlines && data.headlines.length) {
+    data.headlines.forEach((h, i) => {
+      headlinesHTML += `
+        <div class="headline-item">
+          <div class="headline-num">${i + 1}</div>
+          <div class="headline-text">${h}</div>
+        </div>`;
+    });
+  }
+  // Sentiment values
+  const bullish = data.bullish || 0;
+  const bearish = data.bearish || 0;
+  const neutral = data.neutral || 0;
+  const confidence = data.confidence || 0;
+  const card = document.createElement("div");
+  card.className = "result-card";
+  card.innerHTML = `
+    <div class="stock-header">
+      <div class="stock-name-block">
+        <div class="stock-name">${data.company}</div>
+        <div class="stock-ticker">${data.ticker} · ${data.sector || ""}</div>
+      </div>
+      <div class="stock-header-right">
+        <button class="add-watchlist-btn ${isInWatchlist ? 'added' : ''}"
+                data-ticker="${ticker}"
+                data-company="${data.company}"
+                data-currency="${data.currency || '$'}"
+                onclick="handleWatchlistClick(this)">
+          <span class="watchlist-btn-icon">${isInWatchlist ? '✓' : '+'}</span>
+          ${isInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+        </button>
+        <div class="stock-price-block">
+          <div class="stock-price">${data.price}</div>
+          <div class="stock-price-sub">Current Price</div>
+        </div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-cell">
+        <div class="stat-label">Day High</div>
+        <div class="stat-value">${data.day_high}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Day Low</div>
+        <div class="stat-value">${data.day_low}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Market Cap</div>
+        <div class="stat-value">${data.market_cap}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">P/E Ratio</div>
+        <div class="stat-value">${data.pe_ratio}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Target Price</div>
+        <div class="stat-value">${data.target_price}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Analyst Rec.</div>
+        <div class="stat-value ${recClass}">${rec}</div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-cell">
+        <div class="stat-label">EPS</div>
+        <div class="stat-value">${data.eps || "N/A"}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Revenue Growth</div>
+        <div class="stat-value">${data.revenue_growth || "N/A"}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Profit Margin</div>
+        <div class="stat-value">${data.profit_margin || "N/A"}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">ROE</div>
+        <div class="stat-value">${data.roe || "N/A"}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Debt / Equity</div>
+        <div class="stat-value">${data.debt_to_equity || "N/A"}</div>
+      </div>
+    </div>
+    <div class="analysis-body">${data.analysis}</div>
+    <div class="sentiment-section">
+      <div class="sentiment-header">
+        <div class="sentiment-title">Market Sentiment</div>
+        <div class="confidence-badge">
+          <span class="confidence-label">AI Confidence Score:</span>
+          <span class="confidence-value">${confidence} / 10</span>
+        </div>
+      </div>
+      <div class="sentiment-bar">
+        <div class="sentiment-bar-bullish" style="width:${bullish}%"></div>
+        <div class="sentiment-bar-neutral" style="width:${neutral}%"></div>
+        <div class="sentiment-bar-bearish" style="width:${bearish}%"></div>
+      </div>
+      <div class="sentiment-legend">
+        <div class="sentiment-legend-item">
+          <div class="sentiment-dot sentiment-dot-bullish"></div>
+          <span class="sentiment-legend-text">Bullish</span>
+          <span class="sentiment-legend-pct">${bullish}%</span>
+        </div>
+        <div class="sentiment-legend-item">
+          <div class="sentiment-dot sentiment-dot-neutral"></div>
+          <span class="sentiment-legend-text">Neutral</span>
+          <span class="sentiment-legend-pct">${neutral}%</span>
+        </div>
+        <div class="sentiment-legend-item">
+          <div class="sentiment-dot sentiment-dot-bearish"></div>
+          <span class="sentiment-legend-text">Bearish</span>
+          <span class="sentiment-legend-pct">${bearish}%</span>
+        </div>
+      </div>
+    </div>
+    <div class="headlines-section">
+      <div class="headlines-label">Latest Headlines</div>
+      ${headlinesHTML}
+    </div>
+  `;
+  chat.appendChild(card);
+  setTimeout(() => {
+    chat.scrollTop = card.offsetTop - 16;
+  }, 50);
+  return card;
+}
+// ===================================
+// WATCHLIST CLICK HANDLER
+// ===================================
+function handleWatchlistClick(btn) {
+  const ticker = btn.dataset.ticker;
+  const company = btn.dataset.company;
+  const currency = btn.dataset.currency || "$";
+  if (btn.classList.contains("added")) return;
+  addToWatchlist(ticker, company, currency);
+  btn.innerHTML = `<span class="watchlist-btn-icon">✓</span> In Watchlist`;
+  btn.classList.add("added");
+}
+// ===================================
+// HISTORY
+// ===================================
+function addHistoryItem(data) {
+  const history = document.getElementById("history");
+  const ticker = data.ticker.toUpperCase();
+  if (document.getElementById("hist_" + ticker)) return;
+  const item = document.createElement("div");
+  item.className = "history-item";
+  item.id = "hist_" + ticker;
+  item.innerHTML = `
+    <div class="history-item-name">${data.company}</div>
+    <div class="history-item-ticker">${ticker}</div>
+  `;
+  item.onclick = function() {
+    document.querySelectorAll(".history-item").forEach(i => i.classList.remove("active"));
+    item.classList.add("active");
+    const chat = document.getElementById("chat");
+    chat.innerHTML = "";
+    const cached = resultCache[ticker];
+    if (cached) renderResult(cached);
+  };
+  history.prepend(item);
+}
+// ===================================
+// ANALYZE
+// ===================================
+async function analyze() {
+  const company = document.getElementById("company").value.trim();
+  if (!company) return;
+  const chat = document.getElementById("chat");
+  const btn = document.getElementById("analyzeBtn");
+  const welcome = chat.querySelector(".welcome");
+  if (welcome) welcome.remove();
+  const userMsg = document.createElement("div");
+  userMsg.className = "message user-message";
+  userMsg.innerText = company;
+  chat.appendChild(userMsg);
+  chat.scrollTop = userMsg.offsetTop - 16;
+  const thinking = document.createElement("div");
+  thinking.className = "ai-thinking";
+  thinking.innerHTML = `
+    <div class="thinking-dots"><span></span><span></span><span></span></div>
+    Analyzing financial markets...
+  `;
+  chat.appendChild(thinking);
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/analyze`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ company })
+    });
+    const data = await res.json();
+    thinking.remove();
+    if (data.error) {
+      const errMsg = document.createElement("div");
+      errMsg.className = "ai-thinking";
+      errMsg.innerText = "Error: " + data.error;
+      chat.appendChild(errMsg);
+    } else {
+      resultCache[data.ticker.toUpperCase()] = data;
+      renderResult(data);
+      addHistoryItem(data);
+      document.querySelectorAll(".history-item").forEach(i => i.classList.remove("active"));
+      const histItem = document.getElementById("hist_" + data.ticker.toUpperCase());
+      if (histItem) histItem.classList.add("active");
+    }
+  } catch(err) {
+    thinking.remove();
+    const errMsg = document.createElement("div");
+    errMsg.className = "ai-thinking";
+    errMsg.innerText = "Backend connection failed. Make sure server is running on port 8000.";
+    chat.appendChild(errMsg);
+  }
+  btn.disabled = false;
+  document.getElementById("company").value = "";
+}
+</script>
+</body>
+</html>
